@@ -8,12 +8,10 @@ import {
   LayoutDashboard,
   Mail,
   Megaphone,
-  Plug,
   Settings,
   Sparkles,
-  Users,
-  Workflow,
   Sprout,
+  Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -33,8 +31,6 @@ const NAV: NavItem[] = [
   { label: "Intelligence", href: "/intelligence", icon: Sparkles },
   { label: "Email Workspace", href: "/email-workspace", icon: Mail },
   { label: "Contacts", href: "/contacts", icon: Users },
-  { label: "Automations", href: "/automations", icon: Workflow },
-  { label: "Integrations", href: "/integrations", icon: Plug },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 

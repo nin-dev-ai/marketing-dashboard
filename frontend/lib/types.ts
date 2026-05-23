@@ -186,3 +186,32 @@ export interface CampaignDetail {
   email_sequence: EmailSequenceSummary[];
   activity: ActivityItem[];
 }
+
+/* --- Contacts ----------------------------------------------------------- */
+
+export type ContactStatus =
+  | "Not Contacted"
+  | "Queued"
+  | "Contacted"
+  | "Replied"
+  | "Bounced"
+  | "Unsubscribed";
+
+export type Seniority = "C-Level" | "VP" | "Director" | "Manager" | "IC";
+
+export interface Contact {
+  id: string;
+  first_name: string;
+  last_name: string;
+  title: string;
+  seniority: Seniority;
+  email: string;
+  company_id: string;
+  company_name: string;
+  industry: string;
+  status: ContactStatus;
+  tags: string[];
+  added_at: string;
+  last_activity_at?: string;
+  last_activity?: string;
+}
