@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Bookmark,
@@ -25,9 +26,10 @@ import { ScoreBadge } from "@/components/shared/score-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { generateEmails, generateIntelligence, getIntelligence } from "@/lib/api";
 import { getMockIntelligence } from "@/lib/mock-intelligence";
 import { cn, formatRelativeTime, getInitials } from "@/lib/utils";
-import type { Risk } from "@/lib/types";
+import type { CompanyIntelligence, Risk } from "@/lib/types";
 
 interface PageProps {
   params: { companyId: string };
@@ -43,10 +45,65 @@ const SEVERITY_STYLE: Record<Risk["severity"], string> = {
 export default function IntelligencePage({ params }: PageProps) {
   const { companyId } = params;
   const router = useRouter();
-  const intel = useMemo(() => getMockIntelligence(companyId), [companyId]);
+  const [intel, setIntel] = useState<CompanyIntelligence>(() =>
+    getMockIntelligence(companyId),
+  );
+  const [loading, setLoading] = useState(true);
+  const [generatingEmails, setGeneratingEmails] = useState(false);
   const [activeTab, setActiveTab] = useState("ai");
 
+  useEffect(() => {
+    const controller = new AbortController();
+    getIntelligence(companyId, controller.signal)
+      .then(setIntel)
+      .catch(() => setIntel(getMockIntelligence(companyId)))
+      .finally(() => setLoading(false));
+    return () => controller.abort();
+  }, [companyId]);
+
+  const handleRegenerate = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { company } = intel;
+      const updated = await generateIntelligence({
+        company_id: companyId,
+        company_name: company.name,
+        website: company.website,
+        industry: company.industry,
+        country: company.country,
+        notes: company.notes ?? "",
+      });
+      setIntel(updated);
+      toast.success("Intelligence regenerated");
+    } catch {
+      toast.error("Could not regenerate — is the backend running?");
+    } finally {
+      setLoading(false);
+    }
+  }, [companyId, intel]);
+
+  const handleGenerateEmails = useCallback(async () => {
+    setGeneratingEmails(true);
+    try {
+      const { campaign_id } = await generateEmails({ company_id: companyId });
+      toast.success("Emails generated");
+      router.push(`/email-workspace/${campaign_id}`);
+    } catch {
+      toast.error("Could not generate emails — is the backend running?");
+    } finally {
+      setGeneratingEmails(false);
+    }
+  }, [companyId, router]);
+
   const { company } = intel;
+
+  if (loading && !intel.company.name) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center text-muted-foreground">
+        Loading intelligence…
+      </div>
+    );
+  }
 
   return (
     <>
@@ -119,8 +176,8 @@ export default function IntelligencePage({ params }: PageProps) {
                 <Download className="h-4 w-4" />
                 Download Report
               </Button>
-              <Button>
-                <RefreshCw className="h-4 w-4" />
+              <Button onClick={handleRegenerate} disabled={loading}>
+                <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
                 Regenerate Intelligence
               </Button>
             </div>
@@ -332,10 +389,11 @@ export default function IntelligencePage({ params }: PageProps) {
                   Save Campaign
                 </Button>
                 <Button
-                  onClick={() => router.push(`/email-workspace/${companyId}`)}
+                  onClick={handleGenerateEmails}
+                  disabled={generatingEmails}
                 >
                   <Mail className="h-4 w-4" />
-                  Generate Emails
+                  {generatingEmails ? "Generating…" : "Generate Emails"}
                 </Button>
               </div>
             </div>
@@ -455,9 +513,9 @@ export default function IntelligencePage({ params }: PageProps) {
           <Send className="h-4 w-4" />
           Save Campaign
         </Button>
-        <Button onClick={() => router.push(`/email-workspace/${companyId}`)}>
+        <Button onClick={handleGenerateEmails} disabled={generatingEmails}>
           <Mail className="h-4 w-4" />
-          Generate Emails
+          {generatingEmails ? "Generating…" : "Generate Emails"}
         </Button>
       </div>
     </>

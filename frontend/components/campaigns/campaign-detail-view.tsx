@@ -54,7 +54,13 @@ const TIMELINE_STATUS_STYLE: Record<
  * Reusable content for a single campaign. Used both by the standalone
  * /campaigns/[campaignId] route and the expanded accordion row on /campaigns.
  */
-export function CampaignDetailView({ campaign }: { campaign: CampaignDetail }) {
+export function CampaignDetailView({
+  campaign,
+  onSimulateSend,
+}: {
+  campaign: CampaignDetail;
+  onSimulateSend?: () => void;
+}) {
   return (
     <Tabs defaultValue="overview">
       <TabsList>
@@ -187,7 +193,11 @@ export function CampaignDetailView({ campaign }: { campaign: CampaignDetail }) {
                     Edit Emails
                   </Link>
                 </Button>
-                <Button className="justify-start">
+                <Button
+                  className="justify-start"
+                  type="button"
+                  onClick={onSimulateSend}
+                >
                   <Send className="h-4 w-4" />
                   Send / Simulate Send
                 </Button>

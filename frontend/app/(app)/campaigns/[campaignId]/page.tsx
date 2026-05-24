@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Building2,
@@ -17,8 +18,10 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { getCampaign, simulateCampaignSend } from "@/lib/api";
 import { getMockCampaign } from "@/lib/mock-campaign";
 import { cn, getInitials } from "@/lib/utils";
+import type { CampaignDetail } from "@/lib/types";
 
 interface PageProps {
   params: { campaignId: string };
@@ -26,7 +29,29 @@ interface PageProps {
 
 export default function CampaignDetailPage({ params }: PageProps) {
   const { campaignId } = params;
-  const campaign = useMemo(() => getMockCampaign(campaignId), [campaignId]);
+  const [campaign, setCampaign] = useState<CampaignDetail>(() =>
+    getMockCampaign(campaignId),
+  );
+
+  useEffect(() => {
+    const controller = new AbortController();
+    getCampaign(campaignId, controller.signal)
+      .then(setCampaign)
+      .catch(() => setCampaign(getMockCampaign(campaignId)));
+    return () => controller.abort();
+  }, [campaignId]);
+
+  async function handleSimulateSend() {
+    try {
+      await simulateCampaignSend(campaignId);
+      const updated = await getCampaign(campaignId);
+      setCampaign(updated);
+      toast.success("Campaign simulated send completed");
+    } catch {
+      toast.error("Could not simulate send — is the backend running?");
+    }
+  }
+
   const { company } = campaign;
 
   return (
@@ -118,7 +143,10 @@ export default function CampaignDetailPage({ params }: PageProps) {
         </div>
       </Card>
 
-      <CampaignDetailView campaign={campaign} />
+      <CampaignDetailView
+        campaign={campaign}
+        onSimulateSend={handleSimulateSend}
+      />
     </>
   );
 }

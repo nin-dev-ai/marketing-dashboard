@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Building2,
   CheckCircle2,
-  Info,
   Mail,
   Plus,
   Sparkles,
@@ -24,14 +23,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getDashboard } from "@/lib/api";
-import { getMockDashboard } from "@/lib/mock-dashboard";
 import type { DashboardData } from "@/lib/types";
-
-type DataSource = "live" | "demo";
 
 type ViewState =
   | { status: "loading" }
-  | { status: "success"; data: DashboardData; source: DataSource };
+  | { status: "success"; data: DashboardData }
+  | { status: "error"; message: string };
 
 export default function DashboardPage() {
   const [state, setState] = useState<ViewState>({ status: "loading" });
@@ -41,16 +38,15 @@ export default function DashboardPage() {
     try {
       const data = await getDashboard(signal);
       if (signal?.aborted) return;
-      setState({ status: "success", data, source: "live" });
-    } catch {
+      setState({ status: "success", data });
+    } catch (err) {
       if (signal?.aborted) return;
-      // Backend isn't running yet — fall back to demo data so the screen
-      // still renders. Once the FastAPI service is up, the live branch
-      // takes over automatically.
       setState({
-        status: "success",
-        data: getMockDashboard(),
-        source: "demo",
+        status: "error",
+        message:
+          err instanceof Error
+            ? err.message
+            : "Could not load dashboard from API / Postgres",
       });
     }
   }, []);
@@ -78,50 +74,29 @@ export default function DashboardPage() {
 
       {state.status === "loading" ? (
         <DashboardLoading />
+      ) : state.status === "error" ? (
+        <div className="rounded-xl border border-status-red-fg/20 bg-status-red-bg/40 px-4 py-3 text-sm text-status-red-fg">
+          {state.message}. Start the backend and Postgres, then refresh.
+        </div>
       ) : (
-        <DashboardContent data={state.data} source={state.source} />
+        <DashboardContent data={state.data} />
       )}
     </>
   );
 }
 
-function DemoBanner() {
-  return (
-    <div className="flex items-start gap-3 rounded-xl border border-status-yellow-fg/15 bg-status-yellow-bg/60 px-4 py-3 text-sm text-status-yellow-fg">
-      <Info className="mt-0.5 h-4 w-4 shrink-0" />
-      <div className="leading-snug">
-        <span className="font-medium">Showing demo data.</span>{" "}
-        <span className="text-status-yellow-fg/90">
-          The Emitly backend isn&apos;t reachable on{" "}
-          <code className="rounded bg-card/70 px-1 py-0.5 font-mono text-[11px]">
-            {process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"}
-          </code>
-          . Live data will load automatically once it&apos;s running.
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function DashboardContent({
-  data,
-  source,
-}: {
-  data: DashboardData;
-  source: DataSource;
-}) {
+function DashboardContent({ data }: { data: DashboardData }) {
   const { kpis, recent_campaigns, top_opportunities, activity_feed } = data;
 
   return (
     <div className="space-y-6">
-      {source === "demo" ? <DemoBanner /> : null}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           label="Dream Companies"
           value={kpis.dream_companies}
           icon={Building2}
           tone="green"
-          caption="Active targets"
+          caption="From Postgres dream list"
         />
         <KpiCard
           label="Opportunities"

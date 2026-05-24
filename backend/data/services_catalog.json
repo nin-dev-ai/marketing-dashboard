@@ -1,0 +1,56 @@
+[
+  {
+    "id": "s_ai_assessment",
+    "name": "AI Security Assessment",
+    "description": "End-to-end review of LLM/AI surfaces against OWASP LLM Top 10 and MITRE ATLAS.",
+    "risk_keywords": ["llm", "copilot", "model", "ai application"]
+  },
+  {
+    "id": "s_ai_redteam",
+    "name": "AI Red Teaming",
+    "description": "Adversarial testing of agents and copilots — jailbreaks, data exfiltration, abuse cases.",
+    "risk_keywords": ["prompt injection", "jailbreak", "adversarial", "red team"]
+  },
+  {
+    "id": "s_prompt_injection",
+    "name": "Prompt Injection Testing",
+    "description": "Targeted testing of prompt injection paths in production LLM workflows.",
+    "risk_keywords": ["prompt injection", "copilot", "clinical", "assistant"]
+  },
+  {
+    "id": "s_data_privacy",
+    "name": "Data Protection & Privacy Review",
+    "description": "PHI/PII flows, residency, and consent in AI data pipelines.",
+    "risk_keywords": ["privacy", "phi", "data residency", "compliance"]
+  },
+  {
+    "id": "s_cloud_review",
+    "name": "Cloud Security Review",
+    "description": "Hardening multi-tenant cloud across IAM, networking, and KMS.",
+    "risk_keywords": ["cloud", "multi-tenant", "misconfiguration", "sovereign"]
+  },
+  {
+    "id": "s_ai_governance",
+    "name": "AI Governance & Compliance",
+    "description": "NIST AI RMF / ISO 42001 alignment for regulated buyers.",
+    "risk_keywords": ["governance", "compliance", "regulator", "framework"]
+  },
+  {
+    "id": "s_model_risk",
+    "name": "Model Risk Assessment",
+    "description": "Model lifecycle risks including poisoning, drift, and validation gaps.",
+    "risk_keywords": ["poisoning", "model", "training", "drift"]
+  },
+  {
+    "id": "s_arch_review",
+    "name": "Security Architecture Review",
+    "description": "Design review for AI platform architecture and trust boundaries.",
+    "risk_keywords": ["architecture", "platform", "infrastructure"]
+  },
+  {
+    "id": "s_monitoring",
+    "name": "24/7 Security Monitoring",
+    "description": "Continuous detection for AI workloads and cloud control planes.",
+    "risk_keywords": ["monitoring", "detection", "soc", "operations"]
+  }
+]

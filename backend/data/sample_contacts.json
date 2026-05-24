@@ -1,0 +1,46 @@
+{
+  "default": [
+    {
+      "name": "Head of AI",
+      "role": "Owner of AI strategy & product",
+      "team": "AI / Product",
+      "reason": "Owns the AI roadmap and feels governance gaps first."
+    },
+    {
+      "name": "CISO",
+      "role": "Chief Information Security Officer",
+      "team": "Security",
+      "reason": "Accountable for risk acceptance and compliance posture."
+    },
+    {
+      "name": "VP Engineering",
+      "role": "Owns delivery velocity & quality",
+      "team": "Engineering",
+      "reason": "Cares about shipping AI features safely without slowing delivery."
+    }
+  ],
+  "AI Infrastructure": [
+    {
+      "name": "Head of Cloud",
+      "role": "Owner of infrastructure & multi-tenant platform",
+      "team": "Cloud Engineering",
+      "reason": "Accountable for sovereign cloud assurance and tenant isolation."
+    }
+  ],
+  "Healthcare AI": [
+    {
+      "name": "Chief Medical Informatics Officer",
+      "role": "Clinical AI adoption owner",
+      "team": "Clinical",
+      "reason": "Bridge between clinical workflows and AI safety requirements."
+    }
+  ],
+  "AI Analytics": [
+    {
+      "name": "Head of Data Science",
+      "role": "Analytics & ML platform owner",
+      "team": "Data",
+      "reason": "Owns model pipelines and data governance for analytics products."
+    }
+  ]
+}

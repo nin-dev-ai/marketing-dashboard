@@ -1,7 +1,8 @@
 "use client";
 
-import { Bell, HelpCircle, Search } from "lucide-react";
+import { HelpCircle, Search } from "lucide-react";
 
+import { NotificationsDropdown } from "@/components/layout/notifications-dropdown";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,15 +28,7 @@ export function Header() {
         >
           <HelpCircle className="h-[18px] w-[18px]" />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Notifications"
-          className="relative h-9 w-9 rounded-full text-muted-foreground hover:text-foreground"
-        >
-          <Bell className="h-[18px] w-[18px]" />
-          <span className="absolute right-2 top-2 inline-flex h-2 w-2 rounded-full bg-destructive ring-2 ring-card" />
-        </Button>
+        <NotificationsDropdown />
         <div className="ml-1 hidden flex-col text-right leading-tight sm:flex">
           <span className="text-sm font-medium text-foreground">
             James Pasaporten

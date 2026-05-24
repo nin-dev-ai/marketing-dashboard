@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { createCompany, generateIntelligence } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -97,11 +98,29 @@ export default function AddDreamCompanyPage() {
       return;
     }
     setSubmitting(true);
-    // Simulate the POST → intelligence-generation pipeline.
-    await new Promise((r) => setTimeout(r, 900));
-    setSubmitting(false);
-    toast.success("Generating intelligence — redirecting…");
-    router.push(`/intelligence/core42`);
+    try {
+      const company = await createCompany({
+        company_name: form.company_name.trim(),
+        website: form.website.trim(),
+        industry: form.industry,
+        country: form.country,
+        notes: form.notes.trim(),
+      });
+      await generateIntelligence({
+        company_id: company.id,
+        company_name: company.name,
+        website: company.website,
+        industry: company.industry,
+        country: company.country,
+        notes: company.notes ?? "",
+      });
+      toast.success("Intelligence generated — redirecting…");
+      router.push(`/intelligence/${company.id}`);
+    } catch {
+      toast.error("Could not reach the API. Start the backend on port 8000.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (

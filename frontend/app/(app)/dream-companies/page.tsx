@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Activity,
   ArrowUpRight,
@@ -12,12 +12,14 @@ import {
   Mail,
   MapPin,
   Plus,
+  Radar,
   Search,
   Sparkles,
   Table as TableIcon,
   Target,
   Users,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { KpiCard } from "@/components/shared/kpi-card";
@@ -25,6 +27,7 @@ import { ScoreBadge } from "@/components/shared/score-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -33,12 +36,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  getMockDreamCompanies,
-  type DreamCompany,
-  type DreamCompanyStatus,
-} from "@/lib/mock-companies";
+import { getDreamCompanies, setDreamCompanyMonitoring } from "@/lib/api";
 import { cn, formatRelativeTime, getInitials } from "@/lib/utils";
+import type { DreamCompany, DreamCompanyStatus } from "@/lib/types";
 
 const STATUS_STYLE: Record<DreamCompanyStatus, { bg: string; dot: string }> = {
   New: {
@@ -76,12 +76,73 @@ const STATUS_FILTERS: (DreamCompanyStatus | "All")[] = [
 ];
 
 export default function DreamCompaniesPage() {
-  const companies = useMemo(() => getMockDreamCompanies(), []);
+  const [companies, setCompanies] = useState<DreamCompany[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<DreamCompanyStatus | "All">(
     "All",
   );
   const [view, setView] = useState<"grid" | "table">("grid");
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  const handleMonitoringToggle = useCallback(
+    async (companyId: string, enabled: boolean) => {
+      setTogglingId(companyId);
+      setCompanies((prev) =>
+        prev.map((c) =>
+          c.id === companyId ? { ...c, monitoring_enabled: enabled } : c,
+        ),
+      );
+      try {
+        const updated = await setDreamCompanyMonitoring(companyId, enabled);
+        setCompanies((prev) =>
+          prev.map((c) => (c.id === companyId ? updated : c)),
+        );
+        toast.success(
+          enabled
+            ? "Monitoring enabled — company included in daily scans"
+            : "Monitoring disabled",
+        );
+      } catch (err) {
+        setCompanies((prev) =>
+          prev.map((c) =>
+            c.id === companyId ? { ...c, monitoring_enabled: !enabled } : c,
+          ),
+        );
+        toast.error(err instanceof Error ? err.message : "Could not update monitoring");
+      } finally {
+        setTogglingId(null);
+      }
+    },
+    [],
+  );
+
+  const load = useCallback(async (signal?: AbortSignal) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getDreamCompanies(signal);
+      if (signal?.aborted) return;
+      setCompanies(data);
+    } catch (err) {
+      if (signal?.aborted) return;
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Could not load dream companies from Postgres",
+      );
+      setCompanies([]);
+    } finally {
+      if (!signal?.aborted) setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -89,7 +150,7 @@ export default function DreamCompaniesPage() {
       if (statusFilter !== "All" && c.status !== statusFilter) return false;
       if (!q) return true;
       const hay =
-        `${c.name} ${c.industry} ${c.country} ${c.tags?.join(" ") ?? ""} ${c.last_signal ?? ""}`.toLowerCase();
+        `${c.name} ${c.industry} ${c.country} ${c.last_signal ?? ""}`.toLowerCase();
       return hay.includes(q);
     });
   }, [companies, query, statusFilter]);
@@ -101,6 +162,7 @@ export default function DreamCompaniesPage() {
         ["Intelligence Ready", "Active Campaign", "Sent"].includes(c.status),
       ).length,
       active: companies.filter((c) => c.status === "Active Campaign").length,
+      monitoring: companies.filter((c) => c.monitoring_enabled).length,
       avgScore: Math.round(
         companies.reduce((acc, c) => acc + c.opportunity_score, 0) /
           (companies.length || 1),
@@ -112,7 +174,7 @@ export default function DreamCompaniesPage() {
     <>
       <PageHeader
         title="Dream Companies"
-        subtitle="Your target accounts and where each one sits in the outreach flow."
+        subtitle="Turn monitoring on for companies you want included in daily news scans. Configure schedule in Jobs."
         action={
           <Button asChild>
             <Link href="/dream-companies/new">
@@ -123,7 +185,19 @@ export default function DreamCompaniesPage() {
         }
       />
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {error ? (
+        <p className="mb-6 rounded-xl border border-status-red-fg/20 bg-status-red-bg/40 px-4 py-3 text-sm text-status-red-fg">
+          {error}. Ensure Postgres is running and DATABASE_URL is set in backend/.env.
+        </p>
+      ) : null}
+
+      {loading ? (
+        <p className="py-16 text-center text-sm text-muted-foreground">
+          Loading companies from Postgres…
+        </p>
+      ) : (
+        <>
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <KpiCard
           label="Total Companies"
           value={kpis.total}
@@ -146,6 +220,13 @@ export default function DreamCompaniesPage() {
           caption="Outreach in flight"
         />
         <KpiCard
+          label="Monitoring On"
+          value={kpis.monitoring}
+          icon={Radar}
+          tone="green"
+          caption="Included in daily scans"
+        />
+        <KpiCard
           label="Avg Opportunity"
           value={kpis.avgScore}
           icon={Target}
@@ -163,7 +244,7 @@ export default function DreamCompaniesPage() {
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search companies, industries, tags…"
+                placeholder="Search companies and industries…"
                 className="h-9 w-[280px] rounded-md pl-9"
               />
             </div>
@@ -212,11 +293,20 @@ export default function DreamCompaniesPage() {
           ) : view === "grid" ? (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               {filtered.map((c) => (
-                <CompanyCard key={c.id} company={c} />
+                <CompanyCard
+                  key={c.id}
+                  company={c}
+                  onMonitoringChange={handleMonitoringToggle}
+                  toggling={togglingId === c.id}
+                />
               ))}
             </div>
           ) : (
-            <CompanyTable rows={filtered} />
+            <CompanyTable
+              rows={filtered}
+              onMonitoringChange={handleMonitoringToggle}
+              togglingId={togglingId}
+            />
           )}
         </CardContent>
 
@@ -233,6 +323,8 @@ export default function DreamCompaniesPage() {
           </Button>
         </div>
       </Card>
+        </>
+      )}
     </>
   );
 }
@@ -284,14 +376,19 @@ function StatusPill({ status }: { status: DreamCompanyStatus }) {
   );
 }
 
-function CompanyCard({ company: c }: { company: DreamCompany }) {
+function CompanyCard({
+  company: c,
+  onMonitoringChange,
+  toggling,
+}: {
+  company: DreamCompany;
+  onMonitoringChange: (companyId: string, enabled: boolean) => void;
+  toggling: boolean;
+}) {
   return (
-    <Link
-      href={`/intelligence/${c.id}`}
-      className="group flex flex-col rounded-2xl border border-border bg-card p-5 shadow-card transition-all hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-card-hover"
-    >
+    <div className="group flex flex-col rounded-2xl border border-border bg-card p-5 shadow-card transition-all hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-card-hover">
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
+        <Link href={`/intelligence/${c.id}`} className="flex min-w-0 flex-1 items-start gap-3">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-sm">
             {getInitials(c.name)}
           </span>
@@ -303,9 +400,28 @@ function CompanyCard({ company: c }: { company: DreamCompany }) {
               {c.industry}
             </p>
           </div>
+        </Link>
+        <div className="flex shrink-0 flex-col items-end gap-2">
+          <ScoreBadge score={c.opportunity_score} />
+          <div
+            className="flex items-center gap-2"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              Monitor
+            </span>
+            <Switch
+              checked={Boolean(c.monitoring_enabled)}
+              disabled={toggling}
+              onCheckedChange={(checked) => onMonitoringChange(c.id, checked)}
+              aria-label={`Monitor ${c.name}`}
+            />
+          </div>
         </div>
-        <ScoreBadge score={c.opportunity_score} className="shrink-0" />
       </div>
+
+      <Link href={`/intelligence/${c.id}`} className="flex flex-1 flex-col">
 
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1">
@@ -325,17 +441,6 @@ function CompanyCard({ company: c }: { company: DreamCompany }) {
         </p>
       ) : null}
 
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {c.tags?.map((t) => (
-          <span
-            key={t}
-            className="inline-flex items-center rounded-full bg-primary-100 px-2 py-0.5 text-[11px] font-medium text-primary-700"
-          >
-            {t}
-          </span>
-        ))}
-      </div>
-
       <div className="mt-4 grid grid-cols-3 gap-2 border-t border-border pt-3 text-center">
         <Stat label="Stakeholders" value={c.stakeholders_count} icon={Users} />
         <Stat label="Campaigns" value={c.campaigns_count} icon={Activity} />
@@ -349,7 +454,8 @@ function CompanyCard({ company: c }: { company: DreamCompany }) {
           <ArrowUpRight className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
         </span>
       </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
 
@@ -375,7 +481,15 @@ function Stat({
   );
 }
 
-function CompanyTable({ rows }: { rows: DreamCompany[] }) {
+function CompanyTable({
+  rows,
+  onMonitoringChange,
+  togglingId,
+}: {
+  rows: DreamCompany[];
+  onMonitoringChange: (companyId: string, enabled: boolean) => void;
+  togglingId: string | null;
+}) {
   return (
     <Table>
       <TableHeader>
@@ -383,6 +497,7 @@ function CompanyTable({ rows }: { rows: DreamCompany[] }) {
           <TableHead className="pl-6">Company</TableHead>
           <TableHead>Industry</TableHead>
           <TableHead>Country</TableHead>
+          <TableHead>Monitor</TableHead>
           <TableHead>Opportunity</TableHead>
           <TableHead>Status</TableHead>
           <TableHead className="text-right">Stakeholders</TableHead>
@@ -416,6 +531,14 @@ function CompanyTable({ rows }: { rows: DreamCompany[] }) {
             </TableCell>
             <TableCell className="text-sm text-muted-foreground">
               {c.country}
+            </TableCell>
+            <TableCell>
+              <Switch
+                checked={Boolean(c.monitoring_enabled)}
+                disabled={togglingId === c.id}
+                onCheckedChange={(checked) => onMonitoringChange(c.id, checked)}
+                aria-label={`Monitor ${c.name}`}
+              />
             </TableCell>
             <TableCell>
               <ScoreBadge score={c.opportunity_score} />

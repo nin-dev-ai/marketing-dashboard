@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Building2,
+  CalendarClock,
   ChevronsUpDown,
   LayoutDashboard,
   Mail,
@@ -27,6 +28,7 @@ type NavItem = {
 const NAV: NavItem[] = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { label: "Dream Companies", href: "/dream-companies", icon: Building2 },
+  { label: "Jobs", href: "/jobs", icon: CalendarClock },
   { label: "Campaigns", href: "/campaigns", icon: Megaphone },
   { label: "Intelligence", href: "/intelligence", icon: Sparkles },
   { label: "Email Workspace", href: "/email-workspace", icon: Mail },

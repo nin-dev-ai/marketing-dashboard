@@ -215,3 +215,109 @@ export interface Contact {
   last_activity_at?: string;
   last_activity?: string;
 }
+
+/* --- Dream list (Postgres) ---------------------------------------------- */
+
+export type DreamCompanyStatus =
+  | "New"
+  | "Researching"
+  | "Intelligence Ready"
+  | "Active Campaign"
+  | "Sent"
+  | "Archived";
+
+export interface DreamCompany extends Company {
+  status: DreamCompanyStatus;
+  opportunity_score: number;
+  stakeholders_count: number;
+  campaigns_count: number;
+  emails_count: number;
+  last_signal?: string;
+  added_at: string;
+  updated_at: string;
+  tier?: string;
+  is_g42_group?: boolean;
+  slug?: string;
+  description?: string;
+  parent_company?: string;
+  linkedin_url?: string;
+  hq_city?: string;
+  monitoring_enabled?: boolean;
+}
+
+/* --- Jobs / matching pipeline ------------------------------------------- */
+
+export type CampaignMode = "auto" | "notify";
+
+export interface JobSettings {
+  workspace_id: string;
+  daily_scan_enabled: boolean;
+  daily_scan_time: string;
+  timezone: string;
+  weekly_summary_enabled: boolean;
+  weekly_interval_days: number;
+  weekly_run_day: number;
+  campaign_mode: CampaignMode;
+  min_opportunity_score: number;
+  last_daily_run_at?: string | null;
+  last_weekly_run_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface JobStatus {
+  settings: JobSettings;
+  monitoring_enabled_count: number;
+  total_companies: number;
+  pending_decisions: number;
+  daily_matches_7d: number;
+  weekly_summaries_30d: number;
+}
+
+export interface MatchTableRow {
+  match_id: string;
+  company_id: string;
+  company_name: string;
+  match_date: string;
+  news_article_1: Record<string, unknown>;
+  service_match_1: Record<string, unknown>;
+  news_article_2: Record<string, unknown>;
+  service_match_2: Record<string, unknown>;
+  news_article_3: Record<string, unknown>;
+  service_match_3: Record<string, unknown>;
+  condensed: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface MatchSummaryRow {
+  summary_id: string;
+  company_id: string;
+  company_name: string;
+  summary_start_date: string;
+  summary_end_date: string;
+  summary_date: string;
+  weekly_summary?: string | null;
+  opportunity_score: number;
+  created_at?: string;
+}
+
+export interface CampaignDecision {
+  decision_id: string;
+  company_id: string;
+  summary_id?: string | null;
+  company_name: string;
+  opportunity_score: number;
+  weekly_summary?: string | null;
+  status: "pending" | "approved" | "dismissed";
+  created_at: string;
+  resolved_at?: string | null;
+}
+
+export interface JobRunResult {
+  job: string;
+  companies_processed: number;
+  succeeded: number;
+  failed: number;
+  results: Record<string, unknown>[];
+  message?: string | null;
+}

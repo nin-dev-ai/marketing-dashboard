@@ -1,0 +1,90 @@
+[
+  {
+    "company_names": ["Core42", "core42"],
+    "industries": ["AI Infrastructure", "Healthcare AI"],
+    "title": "Core42 launches sovereign AI infrastructure platform for healthcare",
+    "source": "TechMENA",
+    "published_at_offset_days": 2,
+    "summary": "Core42 announced the launch of a sovereign cloud platform built for healthcare and life sciences, enabling secure deployment of AI applications on UAE-based infrastructure with strict data residency and compliance controls.",
+    "url": "https://example.com/news/core42-sovereign-ai",
+    "publisher": "TechMENA",
+    "raw_content": "Core42 sovereign AI healthcare platform UAE data residency compliance LLM clinical copilots multi-tenant cloud."
+  },
+  {
+    "company_names": ["Presight AI", "Presight", "presight"],
+    "industries": ["AI Analytics"],
+    "title": "Presight AI expands Falcon analytics for government AI workloads",
+    "source": "Gulf Insights",
+    "published_at_offset_days": 5,
+    "summary": "Presight AI is scaling its analytics platform for government and smart-city AI workloads, with new emphasis on data governance and model risk management across large-scale deployments.",
+    "url": "https://example.com/news/presight-falcon-analytics",
+    "publisher": "Gulf Insights",
+    "raw_content": "Presight AI analytics government smart city data governance model risk LLM deployment GCC."
+  },
+  {
+    "company_names": ["G42", "G42 Healthcare", "g42-healthcare"],
+    "industries": ["Healthcare AI", "AI Infrastructure"],
+    "title": "G42 Healthcare accelerates clinical AI copilot rollout",
+    "source": "MENA Tech Review",
+    "published_at_offset_days": 3,
+    "summary": "G42 Healthcare is rolling out clinical AI copilots across partner hospitals, focusing on diagnostic assistance while navigating strict healthcare privacy and AI safety requirements.",
+    "url": "https://example.com/news/g42-healthcare-copilots",
+    "publisher": "MENA Tech Review",
+    "raw_content": "G42 Healthcare clinical copilots prompt injection PHI privacy AI safety hospitals UAE."
+  },
+  {
+    "company_names": ["Bayanat", "bayanat"],
+    "industries": ["Geospatial AI"],
+    "title": "Bayanat deploys geospatial AI models on sovereign infrastructure",
+    "source": "TechMENA",
+    "published_at_offset_days": 7,
+    "summary": "Bayanat is deploying geospatial AI models on sovereign infrastructure for defence and smart-city use cases, raising questions around model integrity and supply-chain security.",
+    "url": "https://example.com/news/bayanat-geospatial-ai",
+    "publisher": "TechMENA",
+    "raw_content": "Bayanat geospatial AI sovereign infrastructure model integrity supply chain security."
+  },
+  {
+    "company_names": ["Technology Innovation Institute", "TII", "tii"],
+    "industries": ["AI Research"],
+    "title": "TII open-sources Falcon model updates with enterprise adoption surge",
+    "source": "AI Weekly",
+    "published_at_offset_days": 4,
+    "summary": "Technology Innovation Institute released new Falcon model updates as enterprise adoption grows, increasing demand for red-teaming and AI governance across downstream deployments.",
+    "url": "https://example.com/news/tii-falcon-update",
+    "publisher": "AI Weekly",
+    "raw_content": "TII Falcon open source LLM red teaming governance enterprise adoption Abu Dhabi."
+  },
+  {
+    "company_names": ["Khazna Data Centers", "Khazna", "khazna"],
+    "industries": ["AI Infrastructure"],
+    "title": "Khazna expands AI-ready data centre capacity in Abu Dhabi",
+    "source": "Infrastructure Today",
+    "published_at_offset_days": 10,
+    "summary": "Khazna Data Centers is expanding AI-ready capacity in Abu Dhabi, positioning as critical infrastructure for regional LLM and GPU workloads.",
+    "url": "https://example.com/news/khazna-ai-datacenters",
+    "publisher": "Infrastructure Today",
+    "raw_content": "Khazna data centers AI GPU LLM infrastructure Abu Dhabi cloud security monitoring."
+  },
+  {
+    "company_names": ["Mubadala AI", "Mubadala", "mubadala"],
+    "industries": ["AI Infrastructure"],
+    "title": "Mubadala AI portfolio companies double down on sovereign AI investments",
+    "source": "Gulf Business",
+    "published_at_offset_days": 14,
+    "summary": "Mubadala AI-backed companies are increasing sovereign AI investments across the GCC, with heightened focus on compliance and cyber resilience for national AI programmes.",
+    "url": "https://example.com/news/mubadala-ai-investments",
+    "publisher": "Gulf Business",
+    "raw_content": "Mubadala AI sovereign investments GCC compliance cyber resilience national AI."
+  },
+  {
+    "company_names": ["*"],
+    "industries": ["*"],
+    "title": "GCC enterprises accelerate AI adoption amid rising security concerns",
+    "source": "Regional Tech Report",
+    "published_at_offset_days": 1,
+    "summary": "Enterprises across the GCC are accelerating AI adoption while facing rising concerns around prompt injection, data privacy, cloud misconfiguration, and AI governance gaps.",
+    "url": "https://example.com/report/gcc-ai-security-2026",
+    "publisher": "Regional Tech Report",
+    "raw_content": "GCC AI adoption prompt injection data privacy cloud misconfiguration governance NIST ISO 42001."
+  }
+]
